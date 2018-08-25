@@ -111,7 +111,6 @@ module.exports = (server) => {
               //DISCONNECT SOCKET-----------------------------------------------------------------------------------------
               socket.disconnect(true);
 
-              // TODO: REVIEW WITH WITH ATHENA 
               io.in(socket.game).clients((error, socketIds) => {
                 if (error) {
                   throw error;
@@ -130,7 +129,6 @@ module.exports = (server) => {
               //DISCONNECT SOCKET-----------------------------------------------------------------------------------------
               socket.disconnect(true);
 
-              // TODO: REVIEW WITH WITH ATHENA 
               io.in(socket.game).clients((error, socketIds) => {
                 if (error) {
                   throw error;
