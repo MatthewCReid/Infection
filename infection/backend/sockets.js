@@ -15,7 +15,6 @@ module.exports = (server) => {
   const io = sockets(server);
   var leaderLoop;
   io.on('connection', (socket) => {
-
     socket.on('join game', (playerProps) => {
       const game = playerProps.game;
       const username = playerProps.username; 
