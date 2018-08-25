@@ -1,4 +1,4 @@
-const { ADD_NEW_USER, ASSIGN_ROLES } = require('./actions_users');
+const { ADD_NEW_USER, ASSIGN_ROLES, RESET_USERS, ASSIGN_OFFICER } = require('./actions_users');
 
 
 const newUser = (username, room, socketID, infiltrator, securityOfficer) => ({
@@ -15,8 +15,18 @@ const assignRoles = (infiltrator) => ({
   infiltrator
 });
 
+const resetUsers = () => ({
+  type: RESET_USERS
+});
+
+const assignSecurityOfficer = (securityOfficer) => ({
+  type: ASSIGN_OFFICER
+});
+
 module.exports = {
   newUser,
-  assignRoles
+  assignRoles,
+  resetUsers,
+  assignSecurityOfficer
 };
 
