@@ -1,4 +1,4 @@
-const { ADD_NEW_USER, ASSIGN_ROLES } = require('./actions_users.js');
+const { ADD_NEW_USER, ASSIGN_ROLES, RESET_USERS, ASSIGN_OFFICER } = require('./actions_users.js');
   
 const initialState = require('./initialState_users.js');
 
@@ -40,9 +40,12 @@ const users = (state = initialState, action) => {
       }
     });
 
-    console.log(infiltratorCount);
-    console.log(scientistCount);
-    console.log(assigned);
+  case RESET_USERS: 
+    return initialState;
+
+  case ASSIGN_OFFICER:
+    return;  
+
       
   default:
     return state;
