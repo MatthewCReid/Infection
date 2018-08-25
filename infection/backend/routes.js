@@ -88,7 +88,7 @@ module.exports = (app) => {
       loggedIn: !!req.user, 
       user: req.user 
     });
-  })
+  });
 
   // logout user
   app.get('/logout', (req, res) => {
