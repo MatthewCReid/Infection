@@ -1,12 +1,13 @@
 const sockets = require('socket.io');
 const store = require('./redux/store');
-const { assignRoles } = require('./redux/users/actionCreator_users');
-const { newUser } = require('./redux/users/actionCreator_users');
-const { incrementRound } = require('./redux/rounds/actionCreator_rounds');
+const { assignRoles, assignSecurityOfficer, newUser, resetUsers } = require('./redux/users/actionCreator_users');
+const { incrementRound, restartRounds } = require('./redux/rounds/actionCreator_rounds');
 const { voteCure, voteSabotage, resetVotes } = require('./redux/cureOrSabotage/actionCreator_cureOrSabotage');
+const { voteYes, voteNo, resetMissionVotes } = require('./redux/teamVotes/actionCreator_teamVotes');
 const { leaderLoopCreator } = require('./assignLeaderHelper');
 const { scientistRoundWin, infiltratorRoundWin, restartGame } = require('./redux/game/actionCreator_game');
 const { Game } = require('./database');
+const { rosterGrid } = require('./redux/logic_constants');
 const chalk = require('chalk');
 const log = console.log;
 
@@ -44,10 +45,10 @@ module.exports = (server) => {
           io.to(user.socketID).emit('game start', user);
         });
         setTimeout(() => {
-          let rosterLength = 3; //FIXME: Make dynamic later
           store.dispatch(incrementRound());
           let round = store.getState().round.round;
           leaderLoop = leaderLoopCreator(store.getState().users);
+          let rosterLength = rosterGrid[store.getState().users.length][round - 1]; //FIXME: TEST ME!
           let roundLeader = leaderLoop[round - 1];
           io.in(game).emit('start round', 
             {leader: roundLeader.username, round, rosterLength} 
@@ -62,8 +63,8 @@ module.exports = (server) => {
         .then(playerCount => {
           console.log(playerCount, '63');
           store.getState().users.length === playerCount
-          ? store.dispatch(assignRoles()) && getPlayerProfile()
-          : log(chalk.bold.cyan('User added. Waiting for more users to start game.'));
+            ? store.dispatch(assignRoles()) && getPlayerProfile()
+            : log(chalk.bold.cyan('User added. Waiting for more users to start game.'));
         })
         .catch(err => console.error(err));         
     });
@@ -109,11 +110,39 @@ module.exports = (server) => {
               io.in(socket.game).emit('game over', winner);
               //DISCONNECT SOCKET-----------------------------------------------------------------------------------------
               socket.disconnect(true);
+
+              // TODO: REVIEW WITH WITH ATHENA 
+              io.in(socket.game).clients((error, socketIds) => {
+                if (error) {
+                  throw error;
+                }
+                socketIds.forEach(socketId => io.sockets.socket[socketId].leave(socket.game));
+              }); 
+              store.dispatch(resetUsers());
+              store.dispatch(resetVotes());
+              store.dispatch(resetMissionVotes());
+              store.dispatch(restartGame());
+              store.dispatch(restartRounds());
+              log(store.getState(), 'state at game over winner = true');
             } else if (infiltratorWinTotal === 3) {
               winner = false;
               io.in(socket.game).emit('game over', winner);
               //DISCONNECT SOCKET-----------------------------------------------------------------------------------------
               socket.disconnect(true);
+
+              // TODO: REVIEW WITH WITH ATHENA 
+              io.in(socket.game).clients((error, socketIds) => {
+                if (error) {
+                  throw error;
+                }
+                socketIds.forEach(socketId => io.sockets.socket[socketId].leave(socket.game));
+              }); 
+              store.dispatch(resetUsers());
+              store.dispatch(resetVotes());
+              store.dispatch(resetMissionVotes());
+              store.dispatch(restartGame());
+              store.dispatch(restartRounds());
+              log(store.getState(), 'state at game over winner = true');
             } else { 
               store.dispatch(incrementRound());
               store.dispatch(resetVotes());
